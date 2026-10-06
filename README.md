@@ -11,3 +11,4 @@ The game now starts in the menu state, and clicking "Start" transitions to the p
 + Added a Makefile for easy installation and running of the game. Use "make install" to set up the environment and "make run" to start the game.
 
 Understand Project structure Before splitting the tasks
+contribution
