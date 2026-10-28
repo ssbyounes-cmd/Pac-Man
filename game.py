@@ -2,6 +2,10 @@ import os
 import pygame
 from menustate import MenuState
 from playingstate import PlayingState
+from score_state import ScoreState
+from instruction_state import InstructionsState
+from pause_state import PauseState
+
 
 class Game:
     MENU_WIDTH = 600
@@ -21,19 +25,22 @@ class Game:
         # Register your pages
         self.states = {
             "MENU": MenuState(self),
-            "PLAYING": PlayingState(self)
+            "PLAYING": PlayingState(self),
+            "SCORE": ScoreState(self),  # Placeholder for ScoreState, will be initialized later
+            "INSTRUCTIONS": InstructionsState(self),  # Placeholder for InstructionsState, will be initialized later
+            "PAUSE": PauseState(self)  # Placeholder for PauseState, will be initialized later
         }
         self.current_state = self.states["MENU"]
         self.clock = pygame.time.Clock()
 
 
     def change_state(self, state_name):
-        self.current_state = self.states[state_name]
-
-        if state_name == "PLAYING":
+        if state_name == "PLAYING" and self.current_state == self.states["MENU"]:
             self.screen = pygame.display.set_mode((self.PLAY_WIDTH, self.PLAY_HEIGHT))
-        elif state_name == "MENU":
+        elif state_name == "MENU" and self.current_state in [self.states["PLAYING"], self.states["PAUSE"]]:
             self.screen = pygame.display.set_mode((self.MENU_WIDTH, self.MENU_HEIGHT))
+
+        self.current_state = self.states[state_name]
 
     def run(self):
         while self.running:
@@ -44,12 +51,13 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 self.current_state.handle_action(event)
+            self.screen.fill((0, 0, 0))
 
             # 2. Call the update method on whichever page is currently active
             if hasattr(self.current_state, "update"):
                 self.current_state.update(dt)
 
-            self.screen.fill((0, 0, 0))
+
             self.current_state.draw(self.screen)
             pygame.display.flip()
 

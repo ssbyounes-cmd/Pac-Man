@@ -1,4 +1,5 @@
 from base_state import GameState
+from button import button
 import pygame
 import random
 
@@ -26,46 +27,6 @@ class Sparkle:
         surface.blit(self.image, (int(self.x), int(self.y)))
 
 
-class button:
-    def __init__(self, x, y, img_normal, img_hover, text):
-        self.x = x
-        self.y = y
-        self.img_normal = img_normal
-        self.img_hover = img_hover
-        # Dimensions are now automatically pulled from the PNG
-        self.width = img_normal.get_width()
-        self.height = img_normal.get_height()
-        self.text = text
-
-    def draw(self, surface: pygame.Surface):
-        # Dynamically check mouse position to swap images
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        is_hovered = self.x <= mouse_x <= self.x + self.width and self.y <= mouse_y <= self.y + self.height
-        
-        current_img = self.img_hover if is_hovered else self.img_normal
-        surface.blit(current_img, (self.x, self.y))
-
-        # Text rendering (retaining MLX compliance math)
-        approx_char_width = 12
-        approx_text_width = len(self.text) * approx_char_width
-        approx_text_height = 20
-        
-        text_x = self.x + (self.width // 2) - (approx_text_width // 2)
-        text_y = self.y + (self.height // 2) - (approx_text_height // 2)
-        
-        font = pygame.font.Font(None, 36)
-        text_surface = font.render(self.text, True, (0, 0, 0))
-        surface.blit(text_surface, (text_x, text_y))
-
-    def is_clicked(self, action):
-        mouse_x, mouse_y = action.pos
-        if action.type == pygame.MOUSEBUTTONDOWN and action.button == 1:
-            if self.x <= mouse_x <= self.x + self.width:
-                if self.y <= mouse_y <= self.y + self.height:
-                        return True
-        return False
-
-
 
 
 class MenuState(GameState):
@@ -73,19 +34,21 @@ class MenuState(GameState):
         super().__init__(game)
         center_x = self.game.MENU_WIDTH // 2
         center_y = self.game.MENU_HEIGHT // 2
-        # creating a header for the menu
-        self.header_font = pygame.font.Font(None, 62)
-        self.header_text = self.header_font.render("PAC MAN", True, (255, 165, 0)) # orange color
-        self.header_x = center_x - self.header_text.get_width() // 2
+        # upload the bg & header for the menu
+        self.header_img = pygame.image.load("assets/logo.png").convert_alpha()
+        self.header_x = center_x - self.header_img.get_width() // 2
         self.header_y = center_y - 300
+        self.bg_img = pygame.image.load("assets/bg_menu.png").convert_alpha()
 
         # 1. Load the images once
         btn_normal = pygame.image.load("assets/button_normal.png").convert_alpha()
         btn_hover = pygame.image.load("assets/button_hover.png").convert_alpha()
         sparkle_img = pygame.image.load("assets/sparkle.png").convert_alpha()
 
-        self.button_start = button(center_x - 100, center_y - 40, btn_normal, btn_hover, "Start")
-        self.button_quit = button(center_x - 100, center_y + 20, btn_normal, btn_hover, "Quit")
+        self.button_start = button(center_x - 100, center_y - 60, btn_normal, btn_hover, "Start")
+        self.button_score = button(center_x - 100, center_y + 0, btn_normal, btn_hover, "Scores")
+        self.buton_instructions = button(center_x - 100, center_y + 60, btn_normal, btn_hover, "Instructions")
+        self.button_quit = button(center_x - 100, center_y + 120, btn_normal, btn_hover, "Quit")
 
         # Initialize 100 particles for the background
         self.particles = []
@@ -96,6 +59,10 @@ class MenuState(GameState):
         if action.type == pygame.MOUSEBUTTONDOWN and action.button == 1:
             if self.button_start.is_clicked(action):
                 self.game.change_state("PLAYING")
+            elif self.button_score.is_clicked(action):
+                self.game.change_state("SCORE")
+            elif self.buton_instructions.is_clicked(action):
+                self.game.change_state("INSTRUCTIONS")
             elif self.button_quit.is_clicked(action):
                 self.game.running = False
 
@@ -105,8 +72,11 @@ class MenuState(GameState):
             particle.update(dt)
         
     def draw(self, surface: pygame.Surface):
+        surface.blit(self.bg_img, (0, 0))
         for particle in self.particles:
             particle.draw(surface)
         self.button_start.draw(surface)
+        self.button_score.draw(surface)
+        self.buton_instructions.draw(surface)
         self.button_quit.draw(surface)
-        surface.blit(self.header_text, (self.header_x, self.header_y))
+        surface.blit(self.header_img, (self.header_x, self.header_y))

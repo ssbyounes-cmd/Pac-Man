@@ -10,14 +10,16 @@ class GhostMode(Enum):
 
 
 class Entity:
-    def __init__(self, name, power):
+    def __init__(self, name, power, x, y):
+        self.x = x
+        self.y = y
         ...
-
 
 class Pacman(Entity):
     def __init__(self):
         self.lives = 3
-        super().__init__()
+        super().__init__(name="Pacman", power=1, x=0, y=0)
+        self.score = 0
 
     def move(self):
         ...
@@ -28,7 +30,7 @@ class Pacman(Entity):
 
 class Ghost(Entity):
     def __init__(self):
-        super().__init__()
+        super().__init__(name="Ghost", power=1, x=0, y=0)
 
     def chase(self):
         # bfs
